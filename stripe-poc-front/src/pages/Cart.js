@@ -9,17 +9,24 @@ export default function CartPage() {
 		auxCart = adjustQuantitiesCart(userCart);
 	}
 
+	const totalPrice = auxCart
+		.reduce((p, c) => p + c.price * c.quantity, 0)
+		.toFixed(2);
+
 	return (
 		<>
 			<Header />
 			<CartContainer>
 				<CartHeader>Cart</CartHeader>
 				{auxCart.map((item) => RenderCartItem(item))}
-				<BuyContainer onClick={() => sendToStripe(auxCart)}>
-					<div>
-						Total: R${' '}
-						{auxCart.reduce((p, c) => p + c.price * c.quantity, 0).toFixed(2)}
-					</div>
+				<BuyContainer
+					onClick={() => {
+						if (totalPrice > 0) {
+							sendToStripe(auxCart);
+						}
+					}}
+				>
+					<div>Total: R$ {totalPrice}</div>
 					<div>Click here to Buy!</div>
 				</BuyContainer>
 			</CartContainer>
