@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import axios from 'axios';
 import Header from '../components/Header';
 import { userCart } from '../userCart/userCart';
 
@@ -8,15 +9,13 @@ export default function CartPage() {
 		auxCart = adjustQuantitiesCart(userCart);
 	}
 
-	console.log(auxCart);
-
 	return (
 		<>
 			<Header />
 			<CartContainer>
 				<CartHeader>Cart</CartHeader>
 				{auxCart.map((item) => RenderCartItem(item))}
-				<BuyContainer>
+				<BuyContainer onClick={() => sendToStripe(auxCart)}>
 					<div>
 						Total: R${' '}
 						{auxCart.reduce((p, c) => p + c.price * c.quantity, 0).toFixed(2)}
@@ -26,6 +25,22 @@ export default function CartPage() {
 			</CartContainer>
 		</>
 	);
+}
+
+function sendToStripe(cart) {
+	const body = {
+		items: cart,
+	};
+	//console.log('Buying: ', cart);
+	placeOrder(body);
+}
+
+async function placeOrder(body) {
+	const SERVER_URL = 'http://localhost:4000/order';
+	await axios.post(`${SERVER_URL}`, body).then((res) => {
+		localStorage.setItem('transaction id: ', res.data.id);
+		window.location = res.data.url;
+	});
 }
 
 function RenderCartItem(item) {
